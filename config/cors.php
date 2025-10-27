@@ -15,11 +15,15 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+
+
+    'paths' => ['api/*', 'sanctum/csrf-cookie', '*'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => [
+        'https://haraj-r22ctv54s-aboods-projects-74d6caeb.vercel.app', // رابط الواجهة الأمامية
+    ],
 
     'allowed_origins_patterns' => [],
 
@@ -32,3 +36,4 @@ return [
     'supports_credentials' => false,
 
 ];
+
