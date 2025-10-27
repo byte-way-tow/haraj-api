@@ -32,6 +32,7 @@ RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available
 
 # فتح المنفذ 80
 EXPOSE 80
+RUN php artisan migrate --force || true
 
 # تشغيل Apache
 CMD ["apache2-foreground"]
