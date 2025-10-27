@@ -1,28 +1,37 @@
-# استخدم صورة PHP مع Composer
+# استخدم صورة PHP مع Apache
 FROM php:8.2-apache
 
-# تثبيت التمديدات المطلوبة
+# تحديث النظام وتثبيت مكتبات SQLite وغيرها
+RUN apt-get update && apt-get install -y \
+    libsqlite3-dev \
+    zip unzip git curl
+
+# تثبيت امتدادات PHP المطلوبة للـ Laravel
 RUN docker-php-ext-install pdo pdo_sqlite
 
-# نسخ ملفات المشروع
-COPY . /var/www/html/
+# تمكين mod_rewrite في Apache (مطلوب للـ Laravel routes)
+RUN a2enmod rewrite
 
-# إعداد صلاحيات المجلدات
-RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+# نسخ ملفات المشروع إلى السيرفر
+COPY . /var/www/html/
 
 # تعيين مجلد العمل
 WORKDIR /var/www/html
 
-# تثبيت الاعتمادات
-RUN apt-get update && apt-get install -y zip unzip && curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
+# تثبيت Composer
+RUN curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
+
+# تثبيت اعتماديات Laravel
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
-# إعداد Apache لتوجيه الطلبات إلى public/
-RUN a2enmod rewrite
-COPY ./public/.htaccess /var/www/html/public/.htaccess
-RUN echo "DocumentRoot /var/www/html/public" > /etc/apache2/sites-available/000-default.conf
+# إعداد صلاحيات الملفات
+RUN chmod -R 775 storage bootstrap/cache
 
-# فتح المنفذ
+# تعديل إعداد Apache ليشير إلى مجلد public/
+RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
+
+# فتح المنفذ 80
 EXPOSE 80
 
+# تشغيل Apache
 CMD ["apache2-foreground"]
