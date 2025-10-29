@@ -27,7 +27,8 @@ RUN curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/lo
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
 # إعداد صلاحيات الملفات
-RUN chmod -R 775 storage bootstrap/cache
+RUN chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
+
 
 # تعديل إعداد Apache ليشير إلى مجلد public/
 RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
