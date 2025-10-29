@@ -1,15 +1,11 @@
 # استخدم صورة PHP مع Apache
 FROM php:8.2-apache
 
-# تحديث النظام وتثبيت مكتبات SQLite وغيرها
+# تحديث النظام وتثبيت المكتبات اللازمة
 RUN apt-get update && apt-get install -y \
     libsqlite3-dev \
-    zip unzip git curl
-
-# تثبيت امتدادات PHP المطلوبة للـ Laravel
-#RUN docker-php-ext-install pdo pdo_sqlite
-RUN docker-php-ext-install pdo pdo_mysql
-
+    zip unzip git curl \
+    && docker-php-ext-install pdo pdo_mysql
 
 # تمكين mod_rewrite في Apache (مطلوب للـ Laravel routes)
 RUN a2enmod rewrite
@@ -23,18 +19,22 @@ WORKDIR /var/www/html
 # تثبيت Composer
 RUN curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
 
-# تثبيت اعتماديات Laravel
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+# تثبيت اعتماديات Laravel (بدون dev)
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
-# إعداد صلاحيات الملفات
+# إنشاء مفتاح التطبيق تلقائياً في حالة عدم وجوده
+RUN php artisan key:generate || true
+
+# إعداد صلاحيات الملفات (مهم جداً لتفادي Permission denied)
 RUN chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
-
 
 # تعديل إعداد Apache ليشير إلى مجلد public/
 RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
 
 # فتح المنفذ 80
 EXPOSE 80
+
+# تنفيذ migrations (إن وجدت قاعدة بيانات)
 RUN php artisan migrate --force || true
 
 # تشغيل Apache
