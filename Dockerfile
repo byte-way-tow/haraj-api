@@ -7,7 +7,9 @@ RUN apt-get update && apt-get install -y \
     zip unzip git curl
 
 # تثبيت امتدادات PHP المطلوبة للـ Laravel
-RUN docker-php-ext-install pdo pdo_sqlite
+#RUN docker-php-ext-install pdo pdo_sqlite
+RUN docker-php-ext-install pdo pdo_mysql
+
 
 # تمكين mod_rewrite في Apache (مطلوب للـ Laravel routes)
 RUN a2enmod rewrite
