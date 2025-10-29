@@ -6,6 +6,8 @@ RUN apt-get update && apt-get install -y \
     libsqlite3-dev \
     zip unzip git curl \
     && docker-php-ext-install pdo pdo_mysql
+    
+RUN docker-php-ext-install pdo pdo_pgsql
 
 # تمكين mod_rewrite في Apache (مطلوب للـ Laravel routes)
 RUN a2enmod rewrite
